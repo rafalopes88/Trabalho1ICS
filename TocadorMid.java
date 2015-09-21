@@ -1,3 +1,4 @@
+package tocadormid;
 
 import java.text.DecimalFormat;
 import java.io.File;
@@ -178,7 +179,7 @@ public class TocadorMid extends JPanel implements ActionListener {
             if (sequenciador.isRunning()){ 
                 duracao = sequenciador.getMicrosecondLength();
                 soando = true;
-                progressaoBarra();
+                //progressaoBarra();
             } 
             else { 
                 soando = false; 

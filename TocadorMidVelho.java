@@ -1,4 +1,3 @@
-package tocadormid;
 
 import java.text.DecimalFormat;
 import java.io.File;
@@ -37,25 +36,34 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.InvalidMidiDataException;
 
-public class TocadorMid extends JPanel implements ActionListener {
+public class TocadorMidVelho extends JPanel implements ActionListener, ChangeListener {
 
     private  int largura = 390;
     private  int altura  = 280;
     private long inicio = 0;
+    static long progresso;
+    static long tempoTotal;
+    static long tempoAtual;
+    BarraDeProgresso thProgresso;
+    Thread threadDeProgresso;
+
+    private int volumeATUAL = 75;
+    private JSlider sliderVolume = new JSlider(JSlider.HORIZONTAL,0, 127, volumeATUAL);        
 
     JButton botaoAbrir, botaoTocar, botaoPausar, botaoParar;
     JTextField caminhoArq;
     JFileChooser pa;
-    JProgressBar barraProgresso;
+    static JProgressBar barraProgresso;
             
 
-    private boolean soando;
+    private boolean soando =false;
 
-    private Sequencer  sequenciador = null;
+    static private Sequencer  sequenciador = null;
     private Sequence   sequencia;
     private Receiver   receptor;
 
-    public TocadorMid() {
+
+    public TocadorMidVelho() {
         super(new BorderLayout());
  
         /*log = new JTextArea(5,20);
@@ -77,12 +85,16 @@ public class TocadorMid extends JPanel implements ActionListener {
         barraProgresso = new JProgressBar();
         //barraProgresso.setStringPainted(true);
 
-        
+        sliderVolume.setMajorTickSpacing(30);
+        sliderVolume.setMinorTickSpacing(10);
+        sliderVolume.setPaintTicks(true);
+        sliderVolume.setPaintLabels(true);   
 
         botaoAbrir.addActionListener(this);
         botaoTocar.addActionListener(this);
         botaoPausar.addActionListener(this);
         botaoParar.addActionListener(this);
+        sliderVolume.addChangeListener(this);        
         
         botaoTocar.setEnabled(false);
         botaoPausar.setEnabled(false);
@@ -98,13 +110,19 @@ public class TocadorMid extends JPanel implements ActionListener {
         
         JPanel barraPainel = new JPanel();
         barraPainel.add(barraProgresso);
-        
-        
+
+        JPanel volumePainel = new JPanel();
+        volumePainel.add(sliderVolume);     
  
         //adicionando o botao e log aos paineis painel
         add(painelLog, BorderLayout.BEFORE_FIRST_LINE);
-        add(barraPainel,BorderLayout.CENTER);
+        add(barraPainel,BorderLayout.LINE_START);
+        add(volumePainel,BorderLayout.LINE_END);
         add(botaoPainel, BorderLayout.PAGE_END);
+
+        thProgresso = new BarraDeProgresso();
+        threadDeProgresso = new Thread(thProgresso);
+        threadDeProgresso.start();
         
     }
     public void Abrir(){
@@ -179,7 +197,6 @@ public class TocadorMid extends JPanel implements ActionListener {
             if (sequenciador.isRunning()){ 
                 duracao = sequenciador.getMicrosecondLength();
                 soando = true;
-                progressaoBarra();
             } 
             else { 
                 soando = false; 
@@ -221,10 +238,38 @@ public class TocadorMid extends JPanel implements ActionListener {
             //botaoPARAR.setEnabled(false);            
     }
 
+    public void AlterarVolume(){
+        if(!sliderVolume.getValueIsAdjusting()){
 
+            int valor = (int)sliderVolume.getValue();
+
+            ShortMessage mensagemDeVolume = new ShortMessage();
+            for(int i=0; i<16; i++){
+                try { 
+                    mensagemDeVolume.setMessage(ShortMessage.CONTROL_CHANGE, i, 7, valor);
+                    receptor.send(mensagemDeVolume, -1);
+                }
+                catch (InvalidMidiDataException e1) {
+                    System.out.println("Erro ao alterar o vomlume");
+                }
+            }
+            volumeATUAL = valor;
+        }
+    }
+
+
+
+    public void stateChanged(ChangeEvent e){
+        if(e.getSource() == sliderVolume){
+            if(soando)
+                AlterarVolume();
+        }
+    }
+    
 
     public void actionPerformed(ActionEvent e) {
  
+
         if (e.getSource() == botaoAbrir) {
             Abrir();
         }
@@ -248,25 +293,27 @@ public class TocadorMid extends JPanel implements ActionListener {
             sequenciador = null;
             inicio = 0L;
             
-             botaoAbrir.setEnabled(true);            
-             botaoTocar.setEnabled(true);
-             botaoPausar.setEnabled(false);
-             botaoParar.setEnabled(false);
-             barraProgresso.setValue(0);
+            botaoAbrir.setEnabled(true);            
+            botaoTocar.setEnabled(true);
+            botaoPausar.setEnabled(false);
+            botaoParar.setEnabled(false);
+            barraProgresso.setValue(0);
              //sliderPROGRESSOinstante.setValue(0);             
              //botaoMOSTRADORinstante.setText(formataInstante(0));      
     }
     
-    public void progressaoBarra(){
-        long progresso;
-        long tempoTotal;
-        long tempoAtual;
-        while(soando == true){
-            tempoTotal = sequenciador.getMicrosecondLength();
-            tempoAtual = sequenciador.getMicrosecondPosition();
-            progresso = 100*tempoAtual/tempoTotal;
-            System.out.println(progresso);
-            barraProgresso.setValue((int)progresso);
+    public class BarraDeProgresso implements Runnable{
+        public void run(){
+
+            while(true){
+                //System.out.println("");
+                if(soando){
+                    tempoTotal = sequenciador.getMicrosecondLength();
+                    tempoAtual = sequenciador.getMicrosecondPosition();
+                    progresso = 100*tempoAtual/tempoTotal;
+                    barraProgresso.setValue((int)progresso);
+                }
+            }
         }
     }
     
@@ -288,7 +335,7 @@ public class TocadorMid extends JPanel implements ActionListener {
         janela.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //adciona o busca arquivo na janela
-        janela.add(new TocadorMid());
+        janela.add(new TocadorMidVelho());
 
         //Mostra a janela
         janela.pack();
