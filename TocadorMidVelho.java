@@ -51,7 +51,7 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
     private JSlider sliderVolume = new JSlider(JSlider.HORIZONTAL,0, 127, volumeATUAL);        
 
     JButton botaoAbrir, botaoTocar, botaoPausar, botaoParar;
-    JTextField caminhoArq;
+    JTextField caminhoArq, duracaoBarra, duracaoMaxima;
     JFileChooser pa;
     static JProgressBar barraProgresso;
             
@@ -74,7 +74,16 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
         caminhoArq = new JTextField();
         caminhoArq.setText(System.getProperty("user.dir"));
         caminhoArq.setEditable(false);
-        painelLog.add(caminhoArq);
+
+
+        duracaoBarra = new JTextField();
+        duracaoBarra.setText("00h 00m 00s");
+        duracaoBarra.setEditable(false);
+
+        duracaoMaxima = new JTextField();
+        duracaoMaxima.setText("Duracao: 00h 00m 00s");
+        duracaoMaxima.setEditable(false);
+        
 
 
         pa = new JFileChooser();
@@ -102,6 +111,9 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
         barraProgresso.setValue(0);
  
         
+        painelLog.add(caminhoArq);
+        painelLog.add(duracaoMaxima);
+
         JPanel botaoPainel = new JPanel(); 
         botaoPainel.add(botaoAbrir);
         botaoPainel.add(botaoTocar);
@@ -110,14 +122,15 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
         
         JPanel barraPainel = new JPanel();
         barraPainel.add(barraProgresso);
+        barraPainel.add(duracaoBarra);
 
         JPanel volumePainel = new JPanel();
         volumePainel.add(sliderVolume);     
  
         //adicionando o botao e log aos paineis painel
-        add(painelLog, BorderLayout.BEFORE_FIRST_LINE);
-        add(barraPainel,BorderLayout.LINE_START);
-        add(volumePainel,BorderLayout.LINE_END);
+        add(painelLog, BorderLayout.PAGE_START);
+        add(barraPainel, BorderLayout.CENTER);
+        add(volumePainel, BorderLayout.AFTER_LINE_ENDS);
         add(botaoPainel, BorderLayout.PAGE_END);
 
         thProgresso = new BarraDeProgresso();
