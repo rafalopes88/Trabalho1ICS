@@ -1,4 +1,3 @@
-
 import java.text.DecimalFormat;
 import java.io.File;
 import java.io.IOException;
@@ -75,14 +74,13 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
         caminhoArq.setText(System.getProperty("user.dir"));
         caminhoArq.setEditable(false);
 
-
-        duracaoBarra = new JTextField();
-        duracaoBarra.setText("00h 00m 00s");
+        duracaoBarra = new JTextField();      
         duracaoBarra.setEditable(false);
+        duracaoBarra.setText(constroiStringTempo(0));
 
         duracaoMaxima = new JTextField();
-        duracaoMaxima.setText("Duracao: 00h 00m 00s");
         duracaoMaxima.setEditable(false);
+        duracaoMaxima.setText("Duracao: 00h 00m 00s");
         
 
 
@@ -173,6 +171,7 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
                 double duracao = sequencianova.getMicrosecondLength()/1000000.0d;
                  
                 //botaoMOSTRADORarquivo.setText("Arquivo: \"" + arqseqnovo.getName() + "\"");                
+                duracaoMaxima.setText("Duracao:"+constroiStringTempo(duracao));
                 //botaoMOSTRADORduracao.setText("\nDura\u00e7\u00e3o:"+ formataInstante(duracao));                   
                   
                 botaoTocar.setEnabled(true);
@@ -203,7 +202,7 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
                                                    
             long duracao  = sequencia.getMicrosecondLength()/1000000;
             //botaoMOSTRADORduracao.setText("\nDura\u00e7\u00e3o:"+ formataInstante(duracao)); 
-            //botaoMOSTRADORinstante.setText(formataInstante(0));                
+            //duracaoBarra.setText(constroiStringTempo(tempoAtual));                
                                             
             sequenciador.setMicrosecondPosition(inicio);
 
@@ -310,25 +309,66 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
             botaoTocar.setEnabled(true);
             botaoPausar.setEnabled(false);
             botaoParar.setEnabled(false);
-            barraProgresso.setValue(0);
-             //sliderPROGRESSOinstante.setValue(0);             
-             //botaoMOSTRADORinstante.setText(formataInstante(0));      
+            barraProgresso.setValue(0);           
+            duracaoBarra.setText(constroiStringTempo(0));
     }
     
     public class BarraDeProgresso implements Runnable{
         public void run(){
 
             while(true){
-                //System.out.println("");
+                System.out.println("");
                 if(soando){
                     tempoTotal = sequenciador.getMicrosecondLength();
                     tempoAtual = sequenciador.getMicrosecondPosition();
                     progresso = 100*tempoAtual/tempoTotal;
                     barraProgresso.setValue((int)progresso);
+                    duracaoBarra.setText(constroiStringTempo(tempoAtual/1000000));
                 }
             }
         }
     }
+    
+    public String reformata(double x, int casas)
+      {
+          DecimalFormat df = new DecimalFormat() ;
+          df.setGroupingUsed(false);
+          df.setMaximumFractionDigits(casas);
+          return df.format(x);
+      }
+          
+    public String constroiStringTempo(double t1)
+        {
+            String inicio    = "";
+            //--------início
+            double h1  = (int)(t1/3600.0);
+            double m1  = (int)((t1 - 3600*h1)/60);
+            double s1  = (t1 - (3600*h1 +60*m1));
+
+
+            double h1r  = t1/3600.0;
+            double m1r  = (t1 - 3600*h1)/60.0f;
+            double s1r  = (t1 - (3600*h1 +60*m1));
+
+            String sh1="";
+            String sm1="";
+            String ss1="";
+
+            if     (h1 ==0) sh1 = "00";
+            else if(h1 <10) sh1 = "0"+reformata(h1, 0);
+            else if(h1<100) sh1 = "" +reformata(h1, 0);
+            else            sh1 = "" +reformata(h1, 0);
+
+            if     (m1 ==0) sm1 = "00";
+            else if(m1 <10) sm1= "0"+reformata(m1, 0);
+            else if(m1 <60) sm1 = ""+reformata(m1, 0);
+
+            if     (s1 ==0) ss1 = "00";
+            else if(s1 <10) ss1 = "0"+reformata(s1r, 2);
+            else if(s1 <60) ss1 = reformata(s1r, 2);
+
+            return inicio = "\n" + "   "+sh1+"h "+       sm1+"m "+    ss1+"s";
+        }
     
     
 /*        public void propertyChange(PropertyChangeEvent evt) {
