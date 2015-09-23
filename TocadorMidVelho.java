@@ -98,7 +98,7 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
 
         formulaDeCompasso = new JTextField();
         formulaDeCompasso.setEditable(false);
-        formulaDeCompasso.setText("Fórmula de Compasso: ");
+        formulaDeCompasso.setText("Compasso: Metro:");
 
         tonalidade = new JTextField();
         tonalidade.setEditable(false);
@@ -374,7 +374,7 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
 
                     trilhas = sequencia.getTracks();
                     Par fc = getFormulaDeCompasso(trilhas[0]);
-	                formulaDeCompasso.setText("Fórmula de Compasso: " + fc.getX() +":"+ (int)(Math.pow(2, fc.getY())) );
+	                formulaDeCompasso.setText("Compasso: " + fc.getX() +"/"+ (int)(Math.pow(2, fc.getY())) +" Metro: 1/"+ (int)(Math.pow(2, fc.getY())));
 
                     String st;
                     try{
