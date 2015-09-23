@@ -35,6 +35,11 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.InvalidMidiDataException;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 
 public class TocadorMidVelho extends JPanel implements ActionListener, ChangeListener {
 
@@ -49,13 +54,14 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
     BarraDeProgresso thProgresso;
     Thread threadDeProgresso;
 
+
     Track[] trilhas;
 
     private int volumeATUAL = 75;
     private JSlider sliderVolume = new JSlider(JSlider.HORIZONTAL,0, 127, volumeATUAL);
 
     JButton botaoAbrir, botaoTocar, botaoPausar, botaoParar;
-    JTextField caminhoArq, duracaoBarra, duracaoMaxima, andamento, formulaDeCompasso;
+    JTextField caminhoArq, duracaoBarra, duracaoMaxima, andamento, formulaDeCompasso, tonalidade;
     JFileChooser pa;
     static JProgressBar barraProgresso;
 
@@ -94,7 +100,9 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
         formulaDeCompasso.setEditable(false);
         formulaDeCompasso.setText("Fórmula de Compasso: ");
 
-
+        tonalidade = new JTextField();
+        tonalidade.setEditable(false);
+        tonalidade.setText("Tonalidade:");
 
         pa = new JFileChooser();
         botaoAbrir = new JButton("Abrir");
@@ -103,6 +111,7 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
         botaoParar = new JButton("Stop");
         barraProgresso = new JProgressBar();
         //barraProgresso.setStringPainted(true);
+
 
         sliderVolume.setMajorTickSpacing(30);
         sliderVolume.setMinorTickSpacing(10);
@@ -132,21 +141,39 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
         botaoPainel.add(formulaDeCompasso);
 
         JPanel barraPainel = new JPanel();
+        barraPainel.setLayout(new GridLayout(3, 2 , 5, 5));
         barraPainel.add(barraProgresso);
         barraPainel.add(duracaoBarra);
+        barraPainel.add(sliderVolume);
+        barraPainel.add(andamento);
+        barraPainel.add(formulaDeCompasso);
+        barraPainel.add(tonalidade);
 
-        JPanel volumePainel = new JPanel();
+        /*JPanel volumePainel = new JPanel();
         volumePainel.add(sliderVolume);
 
         JPanel parametropartPainel = new JPanel();
-        parametropartPainel.add(andamento);
+        parametropartPainel.add(andamento);*/
+
+        ImageIcon image1 = new ImageIcon("SOM.png");
+        JLabel label1 = new JLabel("", image1, JLabel.CENTER);
+        JPanel som1 = new JPanel(new BorderLayout());
+        som1.add( label1, BorderLayout.CENTER );
+
+        ImageIcon image2 = new ImageIcon("SOM.png");
+        JLabel label2 = new JLabel("", image2, JLabel.CENTER);
+        JPanel som2 = new JPanel(new BorderLayout());
+        som2.add( label2, BorderLayout.CENTER );
 
 
         //adicionando o botao e log aos paineis painel
+        som1.setPreferredSize(new Dimension(245, 207));
+        som2.setPreferredSize(new Dimension(245, 207));
+
         add(painelLog, BorderLayout.PAGE_START);
         add(barraPainel, BorderLayout.CENTER);
-        add(parametropartPainel, BorderLayout.BEFORE_LINE_BEGINS);
-        add(volumePainel, BorderLayout.AFTER_LINE_ENDS);
+        add(som1, BorderLayout.WEST);
+        add(som2, BorderLayout.EAST);
         add(botaoPainel, BorderLayout.PAGE_END);
 
         thProgresso = new BarraDeProgresso();
@@ -347,12 +374,12 @@ public class TocadorMidVelho extends JPanel implements ActionListener, ChangeLis
 
                     trilhas = sequencia.getTracks();
                     Par fc = getFormulaDeCompasso(trilhas[0]);
-	            formulaDeCompasso.setText("Fórmula de Compasso: " + fc.getX() +":"+ (int)(Math.pow(2, fc.getY())) );
+	                formulaDeCompasso.setText("Fórmula de Compasso: " + fc.getX() +":"+ (int)(Math.pow(2, fc.getY())) );
 
                     String st;
                     try{
                         st = getTonalidade(trilhas[0]);
-                        System.out.println("Tonalidade         : " + st);
+                        tonalidade.setText("Tonalidade: "+ st);
                     }
                     catch(Exception e){}
 
